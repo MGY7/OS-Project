@@ -1,0 +1,54 @@
+#include<stdio.h>
+/*#include<fcntl.h>
+#include<stdlib.h>
+#include<sys/types.h>
+#include<sys/stat.h>
+*/
+struct Process_Details
+{
+    int allocated,max_req;
+};
+int main(void)
+{
+    int i,j,x;
+    int total_resource[3];
+    int completed[5][3];
+    int remaining_resource[3];
+    struct Process_Details P[5][3];//Taking an object array for storing details of Processes
+
+    for(i=0;i<3;i++)
+    {
+        printf("Enter the Total Instances for Resource %c\n",(char)(i+65));
+        scanf("%d",&total_resource[i]);
+    }
+
+    for(j=0;j<5;j++)
+    {
+        printf("For Process P%d\n",j);
+        for(i=0;i<3;i++)
+        {
+            printf("Enter the Allocated resources of type %c\n",(char)(i+65));
+            scanf("%d",&(P[j][i].allocated));
+            printf("Enter the Max. Required resources of type %c\n",(char)(i+65));
+            scanf("%d",&(P[j][i].max_req));
+            remaining_resource[i]=total_resource[i]-P[j][i].allocated;
+        }
+    }
+
+    int count=1,sum=0;
+    while(count<=75 && sum!=15)
+    {
+        count++;
+        for(j=0;j<3;j++)
+        {
+            for(i=0;i<5;i++)
+            {
+                if(P[i][j].max_req<=remaining_resource[j] && completed[i][j]!=1)
+                {
+                    remaining_resource[j]=remaining_resource[j]+P[i][j].allocated;
+                    completed[i][j]=1;
+                    sum++;
+                }
+            }
+        }
+    }
