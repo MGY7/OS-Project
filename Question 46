@@ -1,24 +1,133 @@
 #include<stdio.h>
+#include<stdbool.h>
 struct Process_Details
 {
-    int arrival_time,burst_time;
+    int arrival_time;
+    int burst_time;
+    double priority;
+    int wait_time;
+    int TAT;
+    int completion_time;
+    int flag;
 };
-int main()
+
+int main(void)
 {
-    double priority_queue[4];
-    double priority_factor;
+    double priority_factor=0;
     int arrival[4];
     struct Process_Details P[4];
     int i,j;
     int arr[4]={0,1,2,3};
     int total_burst=0;
+
+    //Initializer
+    for(i=0;i<=3;i++)
+    {
+        P[i].flag=0;
+        P[i].priority=0;
+    }
+
+    //taking input from the user
     for(i=0;i<4;i++)
     {
-        printf("Enter the Arrival Time for process P%d\n",i);
+        printf("Enter the Arrival Time for process P%d\n",i+1);
         scanf("%d",&P[i].arrival_time);
         arrival[i]=P[i].arrival_time;
-        printf("Enter the Burst Time for process P%d\n",i);
+        printf("Enter the Burst Time for process P%d\n",i+1);
         scanf("%d",&P[i].burst_time);
         total_burst=total_burst+P[i].burst_time;
     }
+
+    //sorting array according to arrival time
+    for(i=3;i>=0;i--)
+    {
+        for(j=0;j<i;j++)
+        {
+            if(arrival[j]>arrival[j+1])
+            {
+                int x=arrival[j+1];
+                arrival[j+1]=arrival[j];
+                arrival[j]=x;
+                x=arr[j+1];
+                arr[j+1]=arr[j];
+                arr[j]=x;
+            }
+        }
+    }
+
+    int time=0;
+    int count=0;
+    int key;
+    do
+    {
+        key=0;
+        //for first process
+        if(count==0)
+        {
+            if(time>=arrival[count])
+            {
+                count++;
+                P[arr[0]].wait_time=0;
+                time=time+P[arr[0]].burst_time;
+                P[arr[0]].burst_time=0;
+                P[arr[0]].flag=1;
+                P[arr[0]].completion_time=time;
+                P[arr[0]].TAT=P[arr[0]].completion_time-P[arr[0]].arrival_time;
+            }
+        }
+        else
+        {
+            double max_priority=0;
+            //maximum priority calculator
+            for(i=0;i<=3;i++)
+            {
+                if(P[arr[i]].priority>max_priority && P[arr[i]].flag==0)
+                    max_priority=P[arr[i]].priority;
+            }
+            //process picker from priority
+            for(i=0;i<=3;i++)
+            {
+                if(P[arr[i]].priority==max_priority && P[arr[i]].flag==0)
+                {
+                    P[arr[i]].wait_time=time-P[arr[i]].arrival_time;
+                    time=time+P[arr[i]].burst_time;
+                    P[arr[i]].burst_time=0;
+                    P[arr[i]].completion_time=time;
+                    P[arr[i]].flag=1;
+                    P[arr[i]].TAT=P[arr[i]].completion_time-P[arr[i]].arrival_time;
+                }
+            }
+        }
+        //priority updater
+        for(i=0;i<4;i++)
+        {
+            if(arrival[i]<=time && P[arr[i]].flag==0)
+            {
+                int waiting_time=time-arrival[i];
+                priority_factor=1+(waiting_time/P[arr[i]].burst_time);
+                P[arr[i]].priority=priority_factor;
+            }
+        }
+        for(i=0;i<=3;i++)
+        {
+            if(P[i].flag==0)
+            key++;
+        }
+      }while(key!=0);
+
+      double avg_TAT,avg_wait;
+      avg_TAT=0;
+      avg_wait=0;
+      printf("The Order of execution of processes is as Follows:\n");
+      for(i=0;i<=3;i++)
+      {
+            printf("For Process P%d:\n",arr[i]);
+            printf("Turn Around Time = %d\n",P[arr[i]].TAT);
+            avg_TAT+=P[arr[i]].TAT;
+            printf("Waiting Time = %d\n",P[arr[i]].wait_time);
+            avg_wait=P[arr[i]].wait_time;
+      }
+      printf("Average Turn Around Time: %.2lf\nAverage Waiting Time: %.2lf\n",avg_TAT/4,avg_wait/4);
+      return 0;
 }
+
